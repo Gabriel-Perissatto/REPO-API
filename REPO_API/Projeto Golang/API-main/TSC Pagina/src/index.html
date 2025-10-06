@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD de Usuários</title>
+
+    <style>
+        /* --- Reset Básico e Tema Principal --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body,
+        html {
+            width: 100%;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+            padding: 20px;
+        }
+
+        /* --- Tela de Menu --- */
+        #menu-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: calc(100vh - 40px);
+            /* Subtrai o padding do body */
+            text-align: center;
+        }
+
+        #menu-container h1 {
+            color: #FFD700;
+            font-size: 2.8em;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .menu-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .menu-options button {
+            padding: 25px 40px;
+            font-size: 1.2em;
+            font-weight: bold;
+            background-color: #2c2f33;
+            color: #FFD700;
+            border: 2px solid #FFD700;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .menu-options button:hover {
+            background-color: #FFD700;
+            color: #1a1a1a;
+            transform: scale(1.05);
+        }
+
+        /* --- Container Principal --- */
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 40px;
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .column {
+            flex: 1;
+            min-width: 450px;
+            background-color: #2c2f33;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        section {
+            margin-bottom: 25px;
+        }
+
+        /* --- Títulos --- */
+        h2 {
+            color: #FFD700;
+            text-align: center;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        /* --- Formulários e Inputs --- */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        input[type="text"],
+        input[type="email"] {
+            width: 100%;
+            padding: 12px;
+            background-color: #1e1e1e;
+            border: 1px solid #FFD700;
+            border-radius: 5px;
+            color: #f0f0f0;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus {
+            outline: none;
+            border-color: #fffac8;
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .button-group button {
+            flex: 1;
+        }
+
+        /* --- Botões --- */
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #FFD700;
+            color: #1a1a1a;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            background-color: #e6c300;
+            transform: translateY(-2px);
+        }
+
+        #back-to-menu-btn {
+            width: auto;
+            padding: 10px 20px;
+            margin-bottom: 30px;
+            background-color: #444;
+            color: #fff;
+        }
+
+        #back-to-menu-btn:hover {
+            background-color: #555;
+        }
+
+        #clear-btn,
+        #delete-btn {
+            background-color: #444;
+            color: #fff;
+        }
+
+
+
+        #clear-btn:hover {
+            background-color: #555;
+        }
+
+        #delete-btn {
+            background-color: #b82a2a;
+        }
+
+        #delete-btn:hover {
+            background-color: #d13232;
+        }
+
+        /* --- Bloco de Resultado da Busca --- */
+        #result-display {
+            padding: 20px;
+            background-color: #1e1e1e;
+            border-left: 5px solid #FFD700;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', Courier, monospace;
+            line-height: 1.7;
+            min-height: 50px;
+            margin-top: 15px;
+        }
+
+        /* --- Separador Horizontal --- */
+        hr {
+            border: none;
+            height: 1px;
+            background-color: #444;
+            margin: 40px 0;
+        }
+
+        /* --- Tabela de Usuários --- */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        thead th {
+            background-color: #FFD700;
+            color: #1a1a1a;
+            padding: 12px 15px;
+            font-size: 14px;
+        }
+
+        tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #33363a;
+        }
+
+        tbody tr:hover {
+            background-color: #4a4e54;
+        }
+
+        tbody td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #444;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="menu-container">
+        <h1>Gerenciador de Usuários</h1>
+        <div class="menu-options">
+            <button id="action-insert">Inserir</button>
+            <button id="action-update">Atualizar</button>
+            <button id="action-search">Buscar</button>
+            <button id="action-delete">Deletar</button>
+        </div>
+    </div>
+
+
+    <div class="container" id="crud-container" style="display: none;">
+        <div class="column">
+            <button id="back-to-menu-btn">⬅️ Voltar ao Menu</button>
+            <section id="create-update-section">
+                <h2>👤 Dados do Usuário</h2>
+                <form id="user-form">
+                    <input type="text" id="nome" placeholder="Nome Completo" required>
+                    <input type="text" id="cpf_cnpj" placeholder="CPF ou CNPJ" required>
+                    <input type="email" id="email" placeholder="E-mail" required>
+                    <input type="text" id="banco" placeholder="Nome do Banco">
+                    <input type="text" id="agencia" placeholder="Agência">
+                    <input type="text" id="conta" placeholder="Conta">
+                    <input type="text" id="pix" placeholder="Chave PIX (opcional)">
+                    <div class="button-group">
+                        <button type="submit" id="submit-btn">✔️ Salvar</button>
+                        <button type="button" id="clear-btn">🧹 Limpar</button>
+                    </div>
+                </form>
+            </section>
+
+            <hr>
+
+            <section id="search-delete-section">
+                <h2>🔍 Buscar e Deletar</h2>
+                <input type="text" id="search-cpf-input" placeholder="Digite o CPF do usuário">
+                <div class="button-group">
+                    <button id="search-btn">🔎 Buscar</button>
+                    <button id="delete-btn">🗑️ Deletar</button>
+                </div>
+            </section>
+        </div>
+
+        <div class="column">
+            <section>
+                <h2>👥 Lista de Usuários</h2>
+                <button id="load-all-btn">EXIBIR TODOS USUARIOS</button>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>CPF/CNPJ</th>
+                                <th>Email</th>
+                                <th>Agência</th>
+                                <th>Conta</th>
+                                <th>Banco</th>
+                                <th>PIX</th>
+                                <th>Criado em</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section>
+                <hr>
+                <h2>⭐ Detalhes do Usuário Buscado</h2>
+                <div id="result-display">Aguardando busca...</div>
+            </section>
+        </div>
+    </div>
+
+    <script type="module" src="../dist/index.js"></script>
+
+    <script>
+        // Garante que o script só rode depois que a página carregar completamente
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuContainer = document.getElementById('menu-container');
+            const crudContainer = document.getElementById('crud-container');
+
+            const actionInsertBtn = document.getElementById('action-insert');
+            const actionUpdateBtn = document.getElementById('action-update');
+            const actionSearchBtn = document.getElementById('action-search');
+            const actionDeleteBtn = document.getElementById('action-delete');
+            const backToMenuBtn = document.getElementById('back-to-menu-btn');
+
+            function showCrudContainer() {
+                menuContainer.style.display = 'none';
+                crudContainer.style.display = 'flex'; // 'flex' para manter o layout das colunas
+            }
+
+            function showMenu() {
+                crudContainer.style.display = 'none';
+                menuContainer.style.display = 'flex'; // 'flex' para exibir o menu
+            }
+
+            // Adiciona os "escutadores" de eventos para os botões do menu
+            actionInsertBtn.addEventListener('click', () => {
+                showCrudContainer();
+                document.getElementById('nome').focus(); // Foca no primeiro campo do formulário
+            });
+
+            actionUpdateBtn.addEventListener('click', () => {
+                showCrudContainer();
+                // Para atualizar, o ideal é focar na busca primeiro
+                document.getElementById('search-cpf-input').focus();
+            });
+
+            actionSearchBtn.addEventListener('click', () => {
+                showCrudContainer();
+                document.getElementById('search-cpf-input').focus(); // Foca na busca
+            });
+
+            actionDeleteBtn.addEventListener('click', () => {
+                showCrudContainer();
+                document.getElementById('search-cpf-input').focus(); // Foca na busca para deletar
+            });
+
+            // "Escutador" de evento para o botão de voltar
+            backToMenuBtn.addEventListener('click', showMenu);
+        });
+    </script>
+
+</body>
+
+</html>
